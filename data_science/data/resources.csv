@@ -1,0 +1,11 @@
+ward_id,ward_name,budget_limit,chw_hours_available,cool_kits_capacity,hydration_packets_capacity,cool_kit_unit_cost,hydration_packet_cost,cool_kit_chw_hours,hydration_packet_chw_hours
+W01,Vasant Vihar,5000,80,39,131,150,20,1.5,0.5
+W02,Nehru Nagar,5000,40,30,100,150,20,1.5,0.5
+W03,Shastri Nagar,5000,40,21,71,150,20,1.5,0.5
+W04,Rajendra Ward,5000,80,33,113,150,20,1.5,0.5
+W05,Ganga Nagar Slums,5000,40,16,55,150,20,1.5,0.5
+W06,Subhash Ward,5000,80,36,123,150,20,1.5,0.5
+W07,Indira Nagar,5000,40,24,83,150,20,1.5,0.5
+W08,Tilak Colony,5000,120,40,135,150,20,1.5,0.5
+W09,Prasad Nagar,5000,40,26,88,150,20,1.5,0.5
+W10,Vivekananda Ward,5000,120,42,140,150,20,1.5,0.5

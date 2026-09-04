@@ -1,0 +1,72 @@
+{
+  "summary": {
+    "total_patients": 200,
+    "high_risk_patients": 40,
+    "med_risk_patients": 67,
+    "low_risk_patients": 93
+  },
+  "scenarios": {
+    "baseline": {
+      "total_reached": 46,
+      "reach_rate_pct": 23.0,
+      "high_reached": 10,
+      "high_reach_rate_pct": 25.0,
+      "med_reached": 15,
+      "med_reach_rate_pct": 22.4,
+      "low_reached": 21,
+      "low_reach_rate_pct": 22.6,
+      "asha_visits_delivered": 0,
+      "cool_kits_delivered": 0,
+      "hydration_packets_delivered": 0,
+      "sms_delivered": 0
+    },
+    "objective_a_max_reach": {
+      "total_reached": 200,
+      "reach_rate_pct": 100.0,
+      "high_reached": 40,
+      "high_reach_rate_pct": 100.0,
+      "med_reached": 67,
+      "med_reach_rate_pct": 100.0,
+      "low_reached": 93,
+      "low_reach_rate_pct": 100.0,
+      "asha_visits_delivered": 37,
+      "cool_kits_delivered": 0,
+      "hydration_packets_delivered": 67,
+      "sms_delivered": 96,
+      "total_cost": 1436.0,
+      "total_hours": 89.0
+    },
+    "objective_b_equity_vulnerability": {
+      "total_reached": 200,
+      "reach_rate_pct": 100.0,
+      "high_reached": 40,
+      "high_reach_rate_pct": 100.0,
+      "med_reached": 67,
+      "med_reach_rate_pct": 100.0,
+      "low_reached": 93,
+      "low_reach_rate_pct": 100.0,
+      "asha_visits_delivered": 37,
+      "cool_kits_delivered": 85,
+      "hydration_packets_delivered": 16,
+      "sms_delivered": 96,
+      "total_cost": 13166.0,
+      "total_hours": 140.0
+    },
+    "override_scenario": {
+      "total_reached": 200,
+      "reach_rate_pct": 100.0,
+      "high_reached": 40,
+      "high_reach_rate_pct": 100.0,
+      "med_reached": 67,
+      "med_reach_rate_pct": 100.0,
+      "low_reached": 93,
+      "low_reach_rate_pct": 100.0,
+      "asha_visits_delivered": 37,
+      "cool_kits_delivered": 85,
+      "hydration_packets_delivered": 16,
+      "sms_delivered": 96,
+      "total_cost": 13166.0,
+      "total_hours": 140.0
+    }
+  }
+}
