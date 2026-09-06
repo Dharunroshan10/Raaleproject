@@ -13,7 +13,7 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- Custom Style -->
-    <link rel="stylesheet" href="style.css?v=1.0.4">
+    <link rel="stylesheet" href="style.css?v=1.0.5">
 </head>
 <body>
     <div class="app-container">
@@ -62,7 +62,9 @@
                         <li data-view="map">
                             <span class="nav-icon">🗺️</span> Heat-Risk GIS Map
                         </li>
-
+                        <li class="admin-only" data-view="planner">
+                            <span class="nav-icon">⚖️</span> Objective Planner
+                        </li>
                         <li data-view="registry">
                             <span class="nav-icon">🔒</span> Consent &amp; Privacy
                         </li>
@@ -246,7 +248,129 @@
                     </div>
                 </section>
 
+                <!-- VIEW 3: OBJECTIVE PLANNER (ADMIN ONLY) -->
+                <section id="view-planner" class="content-section hidden">
+                    <div class="planner-header">
+                        <div>
+                            <h2>Strategic Response Planner &amp; Resource Allocator</h2>
+                            <p>Compare allocation algorithms under structural budgets and personnel limits. Permit authorised overrides for emergencies.</p>
+                        </div>
+                        <div class="override-panel">
+                            <span class="override-label">Authorised CHW Overtime Override (+30% hours)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="override-switch">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
 
+                    <div class="planner-tabs">
+                        <button class="planner-tab-btn active" id="tab-obj-b">Objective B: Equity &amp; Vulnerability Priority (Targeted)</button>
+                        <button class="planner-tab-btn" id="tab-obj-a">Objective A: Raw Quantity Maximisation (Generic)</button>
+                    </div>
+
+                    <div class="planner-grid">
+                        <div class="card card-planner-metrics">
+                            <h3>Simulation Outcomes</h3>
+                            <div class="metric-comparison-row">
+                                <div class="comparison-bar-group">
+                                    <div class="bar-label">Total Maternal Cohort Reached</div>
+                                    <div class="bar-container">
+                                        <div class="bar-value primary-color-bg" id="reach-bar" style="width:0%;">0 / 0 (0%)</div>
+                                    </div>
+                                </div>
+                                <div class="comparison-bar-group">
+                                    <div class="bar-label">High-Risk Patients Secured</div>
+                                    <div class="bar-container">
+                                        <div class="bar-value danger-bg" id="high-reach-bar" style="width:0%;">0 / 0 (0%)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="planner-metrics-flex">
+                                <div class="mini-metric">
+                                    <span class="mini-lbl">ASHA Worker Hours Used</span>
+                                    <span class="mini-val" id="plan-metric-hours">0 hrs</span>
+                                    <span class="mini-max" id="plan-metric-hours-max">of — hrs max</span>
+                                </div>
+                                <div class="mini-metric">
+                                    <span class="mini-lbl">Cool Kits Distributed</span>
+                                    <span class="mini-val" id="plan-metric-kits">0 Units</span>
+                                </div>
+                                <div class="mini-metric">
+                                    <span class="mini-lbl">Hydration Packs Distributed</span>
+                                    <span class="mini-val" id="plan-metric-packs">0 Units</span>
+                                </div>
+                                <div class="mini-metric">
+                                    <span class="mini-lbl">Financial Cost</span>
+                                    <span class="mini-val" id="plan-metric-cost">INR 0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="override-indicator hidden" id="override-warning">
+                                <strong>⚠️ OVERRIDE ACTIVE:</strong> Authorised overtime has expanded available ASHA capacity by 30%. Temporary relief mode is active.
+                            </div>
+                        </div>
+
+                        <div class="card card-constraints">
+                            <h3>Resource Constraints Model</h3>
+                            <p class="small-desc">Modify baseline capacities to test model resiliency under different supply conditions.</p>
+
+                            <div class="constraint-slider-group">
+                                <div class="slider-lbl-row">
+                                    <span>Global Cool Kit Stock Level</span>
+                                    <span class="slider-value" id="val-coolkit-stock">100%</span>
+                                </div>
+                                <input type="range" class="custom-slider" id="slider-coolkit-stock" min="10" max="150" value="100">
+                            </div>
+
+                            <div class="constraint-slider-group">
+                                <div class="slider-lbl-row">
+                                    <span>ASHA Allocation Threshold (Hours/Patient)</span>
+                                    <span class="slider-value" id="val-chw-threshold">1.5 hrs</span>
+                                </div>
+                                <input type="range" class="custom-slider" id="slider-chw-threshold" min="0.5" max="3.0" step="0.5" value="1.5">
+                            </div>
+
+                            <div class="constraints-summary-box">
+                                <strong>Hard Constraints:</strong>
+                                <ul>
+                                    <li>Financial Cap: Max INR 5,000 per ward per cycle.</li>
+                                    <li>ASHA Limit: Based on number of active ward staff (e.g. 40 hrs/worker).</li>
+                                </ul>
+                                <strong style="margin-top:10px; display:block;">Soft Constraints:</strong>
+                                <ul>
+                                    <li>SMS / Digital alerts preferred for Low-risk to conserve ASHA hours.</li>
+                                    <li>Cool Kits prioritised for High-risk in high-vulnerability wards.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card comparison-table-card">
+                        <h3>Detailed Ward Optimisation Output</h3>
+                        <div class="table-container">
+                            <table class="data-table" id="planner-ward-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ward ID</th>
+                                        <th>Ward Name</th>
+                                        <th>Risk Score</th>
+                                        <th>Mothers</th>
+                                        <th>Cool Kits</th>
+                                        <th>Hydration Packs</th>
+                                        <th>ASHA Hours</th>
+                                        <th>Budget Spent</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- VIEW 4: CONSENT & PRIVACY MANAGER -->
                 <section id="view-registry" class="content-section hidden">
@@ -440,6 +564,6 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Custom Application Script -->
-    <script src="app.js?v=1.0.4"></script>
+    <script src="app.js?v=1.0.5"></script>
 </body>
 </html>

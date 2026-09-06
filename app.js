@@ -38,6 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const districtSelect   = document.getElementById("district-select");
     const navItems         = document.querySelectorAll(".side-nav li");
     const sections         = document.querySelectorAll(".content-section");
+    const overrideSwitch   = document.getElementById("override-switch");
+    const sliderCoolkit    = document.getElementById("slider-coolkit-stock");
+    const valCoolkit       = document.getElementById("val-coolkit-stock");
+    const sliderChw        = document.getElementById("slider-chw-threshold");
+    const valChw           = document.getElementById("val-chw-threshold");
+    const tabObjA          = document.getElementById("tab-obj-a");
+    const tabObjB          = document.getElementById("tab-obj-b");
     const patientSearch    = document.getElementById("patient-search");
     const consentFilter    = document.getElementById("consent-filter");
     const loadingOverlay   = document.getElementById("loading-overlay");
@@ -49,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function init() {
         setupRoleSwitcher();
         setupNavigation();
-        // setupPlannerControls removed
+        setupPlannerControls();
         setupPatientRegistry();
         setupSimulationControls();
         setupRegistrationForm();
@@ -430,12 +437,48 @@ document.addEventListener("DOMContentLoaded", () => {
     // ─────────────────────────────────────────────
     // RESOURCE OPTIMISATION ENGINE
     // ─────────────────────────────────────────────
-
+    function setupPlannerControls() {
+        if (tabObjA) {
+            tabObjA.addEventListener("click", () => {
+                currentObjective = "obj_a";
+                tabObjA.classList.add("active");
+                if (tabObjB) tabObjB.classList.remove("active");
+                runOptimizationModel();
+            });
+        }
+        if (tabObjB) {
+            tabObjB.addEventListener("click", () => {
+                currentObjective = "obj_b";
+                tabObjB.classList.add("active");
+                if (tabObjA) tabObjA.classList.remove("active");
+                runOptimizationModel();
+            });
+        }
+        if (sliderCoolkit && valCoolkit) {
+            sliderCoolkit.addEventListener("input", (e) => { 
+                valCoolkit.textContent = `${e.target.value}%`; 
+                runOptimizationModel(); 
+            });
+        }
+        if (sliderChw && valChw) {
+            sliderChw.addEventListener("input", (e) => { 
+                valChw.textContent = `${e.target.value} hrs`; 
+                runOptimizationModel(); 
+            });
+        }
+        if (overrideSwitch) {
+            overrideSwitch.addEventListener("change", (e) => {
+                const warn = document.getElementById("override-warning");
+                if (warn) warn.classList.toggle("hidden", !e.target.checked);
+                runOptimizationModel();
+            });
+        }
+    }
 
     function runOptimizationModel() {
-        const coolKitFactor     = 1.0;
-        const chwHoursThreshold = 1.5;
-        const isOverride        = false;
+        const coolKitFactor     = sliderCoolkit ? (parseFloat(sliderCoolkit.value) / 100.0) : 1.0;
+        const chwHoursThreshold = sliderChw ? parseFloat(sliderChw.value) : 1.5;
+        const isOverride        = overrideSwitch ? overrideSwitch.checked : false;
 
         let totalCost = 0, totalChwHours = 0, totalAvailHours = 0;
         let totalCoolKits = 0, totalHydration = 0, totalSms = 0, totalAshaVisits = 0;
@@ -530,7 +573,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const reachPct     = totalPatients > 0 ? (reachedCount / totalPatients * 100).toFixed(1) : "0.0";
         const highReachPct = totalHigh     > 0 ? (reachedHigh  / totalHigh     * 100).toFixed(1) : "0.0";
 
+        const reachBar     = document.getElementById("reach-bar");
+        const highReachBar = document.getElementById("high-reach-bar");
+        if (reachBar) {
+            reachBar.style.width = `${reachPct}%`;
+            reachBar.textContent = totalPatients > 0 ? `${reachedCount} / ${totalPatients} (${reachPct}%)` : "No patients registered";
+        }
+        if (highReachBar) {
+            highReachBar.style.width = `${highReachPct}%`;
+            highReachBar.textContent = totalHigh > 0 ? `${reachedHigh} / ${totalHigh} (${highReachPct}%)` : "No high-risk patients";
+        }
 
+        const planHours = document.getElementById("plan-metric-hours");
+        if (planHours) planHours.textContent = `${totalChwHours.toFixed(1)} hrs`;
+        const planHoursMax = document.getElementById("plan-metric-hours-max");
+        if (planHoursMax) planHoursMax.textContent = `of ${totalAvailHours.toFixed(1)} hrs max`;
+        const planKits = document.getElementById("plan-metric-kits");
+        if (planKits) planKits.textContent = `${totalCoolKits} Units`;
+        const planPacks = document.getElementById("plan-metric-packs");
+        if (planPacks) planPacks.textContent = `${totalHydration} Units`;
+        const planCost = document.getElementById("plan-metric-cost");
+        if (planCost) planCost.textContent = `INR ${totalCost.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
         // Dashboard stat cards
         const dashKits = document.getElementById("dash-cool-kits");
@@ -541,6 +604,31 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dashHours) dashHours.textContent = `${totalChwHours.toFixed(0)} / ${totalAvailHours.toFixed(0)} Hrs`;
         const dashHoursChange = document.getElementById("dash-hours-change");
         if (dashHoursChange) dashHoursChange.textContent = `${totalChwHours.toFixed(0)} hrs active`;
+
+        // Ward optimisation table
+        const tbody = document.querySelector("#planner-ward-table tbody");
+        if (tbody) {
+            tbody.innerHTML = "";
+            if (wardResults.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text-muted);">No ward data available. Select a district first.</td></tr>`;
+            } else {
+                wardResults.forEach(r => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><strong>${r.ward_id}</strong></td>
+                        <td>${r.ward_name}</td>
+                        <td><span class="badge ${r.vulnerability > 0.7 ? "red" : r.vulnerability > 0.4 ? "warning" : "green"}">${r.vulnerability}</span></td>
+                        <td>${r.mothers_count}</td>
+                        <td>${r.cool_kits}</td>
+                        <td>${r.hydration}</td>
+                        <td>${r.hours.toFixed(1)} hrs</td>
+                        <td>INR ${r.budget.toLocaleString("en-IN")}</td>
+                        <td><span class="badge ${r.status === "At Capacity" ? "red" : "green"}">${r.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
 
 
 
